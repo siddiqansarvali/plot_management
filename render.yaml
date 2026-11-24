@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: ai-plot-layout
+    runtime: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: DEBUG
+        value: "false"
+      - key: DATABASE_URL
+        value: "sqlite+aiosqlite:////app/data/app.db"
+      - key: UPLOAD_DIR
+        value: "/app/uploads"
+      - key: OUTPUT_DIR
+        value: "/app/outputs"
+      # Optional: Add your API keys in Render Dashboard Environment settings
+      # - key: GEMINI_API_KEY
+      #   sync: false
+      # - key: OPENROUTER_API_KEY
+      #   sync: false
+    disk:
+      name: ai-plot-storage
+      mountPath: /app/data
+      sizeGB: 1

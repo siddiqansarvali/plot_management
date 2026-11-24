@@ -1,0 +1,19 @@
+# Local credentials and generated runtime data
+backend/.env
+backend/.venv/
+backend/plotlayout.db*
+backend/uploads/
+backend/outputs/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.pytest_cache/
+
+# Frontend dependencies and generated build output
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Editor / OS files
+.DS_Store
+Thumbs.db
+*.log
