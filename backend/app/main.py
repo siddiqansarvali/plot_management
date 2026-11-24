@@ -88,21 +88,26 @@ async def health_check():
     }
 
 
-# ── Production SPA Static Serving ─────────────────────────────────────────────
-# In production, serve the compiled React SPA from frontend/dist if present
-frontend_dist = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+# -- Production SPA Static Serving ---------------------------------------------------
+# /app/app/main.py -> parents[1] = /app -> /app/frontend/dist
+frontend_dist = Path(__file__).resolve().parents[1] / "frontend" / "dist"
+log.info("Frontend dist path: %s (exists=%s)", frontend_dist, frontend_dist.is_dir())
+
 if frontend_dist.is_dir():
     assets_dir = frontend_dist / "assets"
     if assets_dir.is_dir():
         app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="spa-assets")
 
-    @app.get("/{full_path:path}", include_in_schema=False)
-    async def serve_spa(full_path: str):
-        # Do not intercept API, docs, or health endpoints
-        if full_path.startswith("api") or full_path in ("docs", "redoc", "openapi.json", "health"):
-            from fastapi import HTTPException
-            raise HTTPException(status_code=404, detail="Not found")
+@app.get("/{full_path:path}", include_in_schema=False)
+async def serve_spa(full_path: str):
+    # Do not intercept API, docs, or health endpoints
+    if full_path.startswith("api") or full_path in ("docs", "redoc", "openapi.json", "health"):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Not found")
+    if frontend_dist.is_dir():
         target_file = frontend_dist / full_path
         if full_path and target_file.is_file():
             return FileResponse(target_file)
         return FileResponse(frontend_dist / "index.html")
+    from fastapi import HTTPException
+    raise HTTPException(status_code=503, detail="Frontend not built")
